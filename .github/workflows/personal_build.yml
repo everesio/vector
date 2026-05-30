@@ -25,10 +25,6 @@ jobs:
             platform: linux/amd64
             target: x86_64-unknown-linux-gnu
             suffix: amd64
-          - runner: ubuntu-24.04-arm
-            platform: linux/arm64
-            target: aarch64-unknown-linux-gnu
-            suffix: arm64
     steps:
       - uses: actions/checkout@v4
 
@@ -92,5 +88,4 @@ jobs:
         run: |
           docker buildx imagetools create \
             --tag "${IMAGE}:${TAG}" \
-            "${IMAGE}:${TAG}-amd64" \
-            "${IMAGE}:${TAG}-arm64"
+            "${IMAGE}:${TAG}-amd64"
