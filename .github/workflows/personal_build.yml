@@ -44,6 +44,12 @@ jobs:
         with:
           rust: true
 
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
+          cache-on-failure: true
+
       - name: Build Vector
         run: cargo build --release --no-default-features --features default-cmake --bin vector
 
