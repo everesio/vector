@@ -269,19 +269,18 @@ where
             if !this.closed_batches.is_empty() {
                 return Poll::Ready(this.closed_batches.pop());
             }
+
+            // Check expirations on every loop, not only when the input stream is pending.
+            // This prevents timed-out batches from being delayed by newly arriving events.
+            if let Poll::Ready(Some(item_key)) = this.timer.poll_expired(cx) {
+                if let Some(mut batch) = this.batches.remove(&item_key) {
+                    this.closed_batches.push((item_key, batch.take_batch()));
+                    continue;
+                }
+            }
+
             match this.stream.as_mut().poll_next(cx) {
-                Poll::Pending => match this.timer.poll_expired(cx) {
-                    // Unlike normal streams, `DelayQueue` can return `None`
-                    // here but still be usable later if more entries are added.
-                    Poll::Pending | Poll::Ready(None) => return Poll::Pending,
-                    Poll::Ready(Some(item_key)) => {
-                        let mut batch = this
-                            .batches
-                            .remove(&item_key)
-                            .expect("batch should exist if it is set to expire");
-                        this.closed_batches.push((item_key, batch.take_batch()));
-                    }
-                },
+                Poll::Pending => return Poll::Pending,
                 Poll::Ready(None) => {
                     // Now that the underlying stream is closed, we need to
                     // clear out our batches, including all expiration
