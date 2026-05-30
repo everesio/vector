@@ -38,7 +38,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
             cmake clang libclang-dev pkg-config \
-            libssl-dev libsasl2-dev libkrb5-dev protobuf-compiler \
+            libssl-dev libsasl2-dev protobuf-compiler \
             perl make dpkg-dev
 
       - uses: ./.github/actions/setup
@@ -50,7 +50,6 @@ jobs:
           CHANNEL: custom
           VECTOR_VERSION: ${{ inputs.tag }}
           VECTOR_BUILD_DESC: personal
-          KRB5_SYS_USE_PKG_CONFIG: "1"
         run: |
           make package-${{ matrix.target }}-all
 
